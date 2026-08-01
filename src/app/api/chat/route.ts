@@ -14,8 +14,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Messages array is required" }, { status: 400 });
     }
 
+    const lastMsg = messages[messages.length - 1];
+    const userQuery = typeof lastMsg === "string" ? lastMsg : lastMsg?.content || lastMsg?.text || "Hello";
+
     // Process messages with Agent Orchestrator
-    const agentResult = await processAgentConversation(messages);
+    const agentResult = await processAgentConversation(userQuery, messages);
 
     // Save or update conversation if database is connected
     const conn = await connectDB();
@@ -27,20 +30,18 @@ export async function POST(req: Request) {
           sender: "assistant",
           content: agentResult.reply,
           timestamp: new Date().toISOString(),
-          toolCalls: agentResult.toolsExecuted,
+          toolCalls: agentResult.toolResults,
         },
       ];
 
       await Conversation.findOneAndUpdate(
         { conversationId },
         {
-          customerEmail: customerEmail || "aarav.sharma@gmail.com",
+          conversationId,
+          customerEmail: customerEmail || "guest@supportpilot.ai",
           messages: updatedMessages,
-          sentiment: agentResult.sentiment,
-          languageDetected: agentResult.languageDetected,
-          isEscalated: agentResult.isEscalated,
-          ticketCode: agentResult.ticketCode,
-          $addToSet: { toolsUsed: { $each: agentResult.toolsExecuted.map((t) => t.toolName) } },
+          lastUpdated: new Date(),
+          sentimentScore: agentResult.sentiment === "Frustrated" ? -0.9 : 0.5,
         },
         { upsert: true, new: true }
       );
@@ -49,14 +50,19 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       reply: agentResult.reply,
+      reasoningSteps: agentResult.reasoningSteps,
+      toolResults: agentResult.toolResults,
+      language: agentResult.language,
       sentiment: agentResult.sentiment,
-      languageDetected: agentResult.languageDetected,
-      toolsExecuted: agentResult.toolsExecuted,
-      isEscalated: agentResult.isEscalated,
-      ticketCode: agentResult.ticketCode,
     });
   } catch (error: any) {
-    console.error("Chat API Error:", error);
-    return NextResponse.json({ error: "Failed to process chat message", details: error.message }, { status: 500 });
+    console.error("API /api/chat error:", error);
+    return NextResponse.json(
+      {
+        error: "Internal Agent Server Error",
+        message: error.message,
+      },
+      { status: 500 }
+    );
   }
 }

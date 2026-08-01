@@ -430,3 +430,23 @@ export const ALL_TOOLS: Record<string, AgentToolDefinition> = {
   recommend_products: recommendProductsTool,
   human_escalation: humanEscalationTool,
 };
+
+export async function executeTool(name: string, args: Record<string, any>) {
+  let toolKey = name;
+  if (name === "track_order") toolKey = "search_orders";
+  if (name === "initiate_return") toolKey = "return_eligibility";
+  if (name === "check_refund_status") toolKey = "refund_status";
+  if (name === "escalate_to_human") toolKey = "human_escalation";
+
+  const tool = ALL_TOOLS[toolKey] || ALL_TOOLS[name];
+  if (!tool) {
+    return { success: false, error: `Tool ${name} not found` };
+  }
+
+  try {
+    const res = await tool.execute(args);
+    return { success: true, data: res };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
