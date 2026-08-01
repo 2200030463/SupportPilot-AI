@@ -6,7 +6,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useEffect } from "react";
 import { useSmartBack } from "@/hooks/useSmartBack";
 import { AdminSidebar } from "@/components/AdminSidebar";
-import { Home, ArrowLeft, LogOut, LayoutDashboard, ChevronRight } from "lucide-react";
+import { Home, ArrowLeft, LogOut, ChevronRight } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
@@ -26,6 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       sessionStorage.clear();
     }
     await signOut({ redirect: false });
+    router.refresh();
     router.replace("/");
   };
 
@@ -38,25 +39,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return "Management";
   };
 
-  // Immediate protection: render zero dashboard UI or sidebar if unauthenticated
-  if (status === "loading") {
+  if (status === "loading" || status === "unauthenticated" || !session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100 p-4">
-        <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
-          <span className="typing-dot" />
-          <span className="typing-dot" />
-          <span>Authenticating Admin Desk...</span>
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-slate-950 text-slate-100 p-6">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+            <span className="typing-dot" />
+            <span className="typing-dot" />
+            <span className="typing-dot" />
+          </div>
+          <p className="text-xs text-slate-400 font-medium">
+            {status === "unauthenticated"
+              ? "Redirecting to Admin Login..."
+              : "Authenticating Admin Session..."}
+          </p>
         </div>
       </div>
     );
   }
 
-  if (status === "unauthenticated" || !session) {
-    return null;
-  }
-
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex min-h-[calc(100vh-4rem)] bg-slate-950 text-slate-100">
       <AdminSidebar />
 
       <div className="flex-1 flex flex-col min-w-0">

@@ -31,13 +31,14 @@ export function Navbar() {
       sessionStorage.clear();
     }
     await signOut({ redirect: false });
+    router.refresh();
     router.replace("/");
   };
 
   const navItems = [
     { href: "/", label: "Home", icon: Home },
     { href: "/chat", label: "Customer Chat", icon: MessageSquare },
-    { href: isAuthenticated ? "/admin" : "/login", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: isAuthenticated ? "/admin" : "/login", label: isAuthenticated ? "Admin Desk" : "Admin Login", icon: UserCheck },
   ];
 

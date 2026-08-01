@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bot, ShieldCheck, Lock, Mail, ArrowRight, Sparkles } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const { data: session, status } = useSession();
   const [email, setEmail] = useState("admin@supportpilot.ai");
   const [password, setPassword] = useState("admin123");
@@ -13,13 +13,14 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/admin";
+  const target = callbackUrl.startsWith("/admin") ? callbackUrl : "/admin";
 
   useEffect(() => {
     if (status === "authenticated") {
-      const target = callbackUrl.startsWith("/admin") ? callbackUrl : "/admin";
+      router.refresh();
       router.replace(target);
     }
-  }, [status, callbackUrl, router]);
+  }, [status, target, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,24 +33,37 @@ export default function LoginPage() {
       });
 
       if (res?.ok) {
-        const target = callbackUrl.startsWith("/admin") ? callbackUrl : "/admin";
+        router.refresh();
         router.replace(target);
       } else {
-        router.replace("/admin");
+        router.refresh();
+        router.replace(target);
       }
     } catch (err) {
-      router.replace("/admin");
+      router.refresh();
+      router.replace(target);
     } finally {
       setLoading(false);
     }
   };
 
   if (status === "authenticated") {
-    return null;
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-slate-950 text-slate-100 p-6">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+            <span className="typing-dot" />
+            <span className="typing-dot" />
+            <span className="typing-dot" />
+          </div>
+          <p className="text-xs text-slate-400 font-medium">Session Authenticated. Opening Admin Desk...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500">
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500">
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md space-y-8 glass-card rounded-3xl p-8 border border-slate-800 shadow-2xl">
           {/* Brand Header */}
@@ -136,5 +150,21 @@ export default function LoginPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-slate-950 text-slate-100 p-6">
+        <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+          <span className="typing-dot" />
+          <span className="typing-dot" />
+          <span>Loading Login Desk...</span>
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
