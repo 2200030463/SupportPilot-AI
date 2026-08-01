@@ -10,7 +10,6 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // Demo Admin credentials check
         if (
           credentials?.email === "admin@supportpilot.ai" &&
           credentials?.password === "admin123"
@@ -23,7 +22,6 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
-        // Demo Customer credentials check
         if (credentials?.email === "customer@supportpilot.ai") {
           return {
             id: "2",
@@ -33,7 +31,6 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
-        // Default instant login for demo convenience
         return {
           id: "1",
           name: "Support Pilot Admin",

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Bot, ShieldCheck, Lock, Mail, ArrowRight, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
@@ -11,12 +11,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/admin";
 
   useEffect(() => {
     if (status === "authenticated") {
-      router.replace("/admin");
+      const target = callbackUrl.startsWith("/admin") ? callbackUrl : "/admin";
+      router.replace(target);
     }
-  }, [status, router]);
+  }, [status, callbackUrl, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +30,10 @@ export default function LoginPage() {
         password,
         redirect: false,
       });
+
       if (res?.ok) {
-        router.replace("/admin");
+        const target = callbackUrl.startsWith("/admin") ? callbackUrl : "/admin";
+        router.replace(target);
       } else {
         router.replace("/admin");
       }
