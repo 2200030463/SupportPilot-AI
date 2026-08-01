@@ -5,6 +5,7 @@ import { FAQ } from "../../models/FAQ";
 import { Ticket } from "../../models/Ticket";
 import { User } from "../../models/User";
 import {
+  SeedProduct,
   initialOrders,
   initialProducts,
   initialFAQs,
@@ -105,40 +106,51 @@ export const trackShipmentTool: AgentToolDefinition = {
 // 3. Search Products
 export const searchProductsTool: AgentToolDefinition = {
   name: "search_products",
-  description: "Search product catalog by name, category, or budget in INR (₹).",
+  description: "Search product catalog by name, category, brand, specs, or budget in INR (₹).",
   parameters: {
     type: "object",
     properties: {
-      query: { type: "string", description: "Search query e.g. earbuds, shoes, smartwatch" },
+      query: { type: "string", description: "Search query e.g. earphones, phone, smartwatch" },
       category: { type: "string", description: "Category e.g. Electronics, Footwear, Fashion, Home & Kitchen" },
       maxPriceInINR: { type: "number", description: "Maximum price budget in INR (₹)" },
     },
   },
   execute: async (args: Record<string, any>) => {
-    const { query, category, maxPriceInINR } = args;
+    const { query = "", category = "", maxPriceInINR } = args;
     const conn = await connectDB();
     if (conn) {
       const filter: any = {};
-      if (category) filter.category = new RegExp(category, "i");
       if (maxPriceInINR) filter.priceInINR = { $lte: maxPriceInINR };
-      if (query) filter.name = new RegExp(query, "i");
-
       const products = await Product.find(filter).limit(10).lean();
       if (products.length > 0) return { success: true, count: products.length, products };
     }
 
-    // Mock fallback search
+    // Tokenized fuzzy mock search
     let list = [...initialProducts];
-    if (category) {
-      list = list.filter((p) => p.category.toLowerCase().includes(category.toLowerCase()));
-    }
-    if (maxPriceInINR) {
+
+    if (maxPriceInINR && maxPriceInINR > 0) {
       list = list.filter((p) => p.priceInINR <= maxPriceInINR);
     }
-    if (query) {
-      const q = query.toLowerCase();
-      list = list.filter((p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
+
+    if (category && category.trim()) {
+      const catLower = category.toLowerCase();
+      list = list.filter((p) => p.category.toLowerCase().includes(catLower));
     }
+
+    if (query && query.trim()) {
+      const q = query.toLowerCase().trim();
+      const tokens = q.split(/\s+/).filter((t: string) => t.length > 2 && t !== "under" && t !== "show" && t !== "suggest" && t !== "best");
+
+      if (tokens.length > 0) {
+        list = list.filter((p: SeedProduct) => {
+          const text = `${p.name} ${p.brand} ${p.category} ${p.description} ${JSON.stringify(p.specifications)}`.toLowerCase();
+          return tokens.some((t: string) => text.includes(t));
+        });
+      }
+    }
+
+    // Sort by popular and rating
+    list.sort((a, b) => b.rating - a.rating);
 
     return { success: true, count: list.length, products: list.slice(0, 6) };
   },

@@ -32,26 +32,21 @@ export interface IntentResult {
   };
 }
 
-// 1. Language Detector
+// 1. Multilingual Language Detector
 export function detectLanguage(text: string): { language: string; confidence: number } {
   const lower = text.toLowerCase();
 
-  const hindiPatterns = ["kya", "mera", "kahan", "hai", "kaise", "chahiye", "batao", "kab", "aayega", "dijiye", "karo", "mujhe"];
-  const hinglishMatches = hindiPatterns.filter((p) => lower.includes(p));
-
-  if (hinglishMatches.length >= 1) {
+  const hinglishPatterns = ["kya", "mera", "kahan", "hai", "kaise", "chahiye", "batao", "kab", "aayega", "dijiye", "karo", "mujhe", "baat"];
+  if (hinglishPatterns.some((p) => lower.includes(p))) {
     return { language: "Hinglish (Hindi+English)", confidence: 0.92 };
   }
 
-  if (/[\u0900-\u097F]/.test(text)) {
-    return { language: "Hindi (हिंदी)", confidence: 0.98 };
-  }
-  if (/[\u0B80-\u0BFF]/.test(text)) {
-    return { language: "Tamil (தமிழ்)", confidence: 0.98 };
-  }
-  if (/[\u0C00-\u0C7F]/.test(text)) {
-    return { language: "Telugu (తెలుగు)", confidence: 0.98 };
-  }
+  if (/[\u0900-\u097F]/.test(text)) return { language: "Hindi (हिंदी)", confidence: 0.98 };
+  if (/[\u0B80-\u0BFF]/.test(text)) return { language: "Tamil (தமிழ்)", confidence: 0.98 };
+  if (/[\u0C00-\u0C7F]/.test(text)) return { language: "Telugu (తెలుగు)", confidence: 0.98 };
+  if (/[\u0980-\u09FF]/.test(text)) return { language: "Bengali (বাংলা)", confidence: 0.98 };
+  if (/[\u0C80-\u0CFF]/.test(text)) return { language: "Kannada (ಕನ್ನಡ)", confidence: 0.98 };
+  if (/[\u0A80-\u0AFF]/.test(text)) return { language: "Gujarati (ગુજરાતી)", confidence: 0.98 };
 
   return { language: "English", confidence: 0.95 };
 }
@@ -60,11 +55,9 @@ export function detectLanguage(text: string): { language: string; confidence: nu
 export function extractEntities(query: string, context?: ConversationContext) {
   const lower = query.toLowerCase();
 
-  // Extract Order ID (e.g. ORD-1001, ORD1001, ord-999)
   const orderIdMatch = query.match(/ORD-?\d{3,6}/i);
-  let orderId = orderIdMatch ? orderIdMatch[0].toUpperCase().replace("ORD", "ORD-") : undefined;
+  let orderId = orderIdMatch ? orderIdMatch[0].toUpperCase().replace(/^ORD-?/, "ORD-") : undefined;
 
-  // Contextual pronoun resolution: "where is it now?", "status of it", "track it"
   if (!orderId && context?.lastOrderNumber) {
     if (
       lower.includes("where is it") ||
@@ -77,7 +70,6 @@ export function extractEntities(query: string, context?: ConversationContext) {
     }
   }
 
-  // Extract Max Price (e.g. under ₹3000, under 20000, below 5000, under 3k)
   let maxPrice: number | undefined = undefined;
   const priceMatch = lower.match(/(?:under|below|less than|within|around|\u20B9|rs\.?|inr)\s*(\d{1,6})\s*k?/i) ||
                      lower.match(/(\d{1,6})\s*k?\s*(?:rupees|rs|\u20B9)/i);
@@ -88,14 +80,12 @@ export function extractEntities(query: string, context?: ConversationContext) {
     maxPrice = num;
   }
 
-  // Contextual price adjustment: "show cheaper ones", "cheaper earbuds"
   if (lower.includes("cheaper") || lower.includes("cheapest") || lower.includes("budget")) {
     if (context?.lastMaxPrice) {
       maxPrice = Math.round(context.lastMaxPrice * 0.7);
     }
   }
 
-  // Extract Product Category
   let category: string | undefined = undefined;
   if (lower.includes("earphone") || lower.includes("earbuds") || lower.includes("headphone") || lower.includes("airpods")) {
     category = "Audio";
@@ -119,7 +109,6 @@ export function classifyIntents(query: string, context?: ConversationContext): I
   const lower = query.toLowerCase().trim();
   const results: IntentResult[] = [];
 
-  // Check for Multi-Intent splitters (e.g. "Track my order AND tell me if it is eligible for return")
   const subQueries = lower.split(/\b(?:and|also|plus|along with)\b/i);
 
   for (const sub of subQueries) {
@@ -145,7 +134,7 @@ function classifySingleIntent(
 
   // A. GREETINGS
   if (/^(hi|hello|hey|greetings|namaste|good morning|good afternoon|good evening)$/i.test(lower) ||
-      lower === "hi supportpilot" || lower === "hello agent") {
+      lower.includes("hi supportpilot") || lower.includes("hello agent") || lower.includes("hey supportpilot")) {
     return {
       intent: "GREETINGS",
       confidence: 0.98,
@@ -155,7 +144,7 @@ function classifySingleIntent(
 
   // B. SMALL TALK
   if (/^(thank you|thanks|thanks a lot|nice work|who are you|what can you do|who made you)$/i.test(lower) ||
-      lower.includes("thank you") || lower.includes("who are you") || lower.includes("what can you do")) {
+      lower.includes("thank you") || lower.includes("who are you") || lower.includes("what can you do") || lower.includes("thanks a lot")) {
     return {
       intent: "SMALL_TALK",
       confidence: 0.95,
@@ -171,7 +160,12 @@ function classifySingleIntent(
     lower.includes("need support agent") ||
     lower.includes("file complaint") ||
     lower.includes("human support") ||
-    lower.includes("customer executive")
+    lower.includes("customer executive") ||
+    (lower.includes("customer care") && !lower.includes("working hours")) ||
+    lower.includes("representative") ||
+    lower.includes("baat karo") ||
+    lower.includes("manager") ||
+    lower.includes("formal complaint")
   ) {
     return {
       intent: "HUMAN_ESCALATION",
@@ -180,26 +174,7 @@ function classifySingleIntent(
     };
   }
 
-  // D. ORDER TRACKING
-  const orderKeywords = [
-    "where is my order", "track my package", "order status", "delivery status",
-    "has my parcel shipped", "awb tracking", "track order", "track ord-",
-    "where is my parcel", "is my package shipped", "package status", "shipment status",
-    "track my order", "where is it now"
-  ];
-
-  const hasOrderId = !!entities.orderId;
-  const isOrderQuery = orderKeywords.some((k) => lower.includes(k)) || (hasOrderId && (lower.includes("track") || lower.includes("where") || lower.includes("status")));
-
-  if (isOrderQuery || (entities.orderId && !lower.includes("return") && !lower.includes("refund"))) {
-    return {
-      intent: "ORDER_TRACKING",
-      confidence: hasOrderId ? 0.98 : 0.88,
-      entities,
-    };
-  }
-
-  // E. RETURN & EXCHANGE
+  // D. RETURN & EXCHANGE
   if (
     lower.includes("return") ||
     lower.includes("replace") ||
@@ -207,7 +182,10 @@ function classifySingleIntent(
     lower.includes("return policy") ||
     lower.includes("eligible for return") ||
     lower.includes("replace my") ||
-    lower.includes("want to return")
+    lower.includes("want to return") ||
+    lower.includes("karna hai") ||
+    lower.includes("replacement") ||
+    lower.includes("return duration")
   ) {
     return {
       intent: "RETURN_EXCHANGE",
@@ -216,17 +194,24 @@ function classifySingleIntent(
     };
   }
 
-  // F. FAQ SEARCH (Prioritize policy explanations)
+  // E. FAQ SEARCH
   if (
-    lower.includes("warranty") ||
+    lower.includes("explain refund policy") ||
+    lower.includes("warranty policy") ||
     lower.includes("shipping charges") ||
     lower.includes("delivery time") ||
     lower.includes("business hours") ||
     lower.includes("cancellation policy") ||
+    lower.includes("cancellation duration") ||
     lower.includes("contact support") ||
-    lower.includes("explain refund policy") ||
     lower.includes("can i cancel") ||
-    (lower.includes("policy") && !lower.includes("refund status"))
+    lower.includes("delivery charges") ||
+    lower.includes("gst invoice") ||
+    lower.includes("cod available") ||
+    lower.includes("warranty") ||
+    lower.includes("working hours") ||
+    (lower.includes("cancellation") && !lower.includes("noise") && !lower.includes("earbuds")) ||
+    (lower.includes("policy") && !lower.includes("refund status") && !lower.includes("return policy"))
   ) {
     return {
       intent: "FAQ_SEARCH",
@@ -235,7 +220,7 @@ function classifySingleIntent(
     };
   }
 
-  // G. REFUND STATUS
+  // F. REFUND STATUS
   if (
     lower.includes("refund") ||
     lower.includes("payment failed") ||
@@ -243,11 +228,36 @@ function classifySingleIntent(
     lower.includes("upi refund") ||
     lower.includes("when will i get my refund") ||
     lower.includes("my refund") ||
-    lower.includes("refund status")
+    lower.includes("refund status") ||
+    lower.includes("money deducted") ||
+    lower.includes("order failed")
   ) {
     return {
       intent: "REFUND_STATUS",
-      confidence: 0.94,
+      confidence: 0.95,
+      entities,
+    };
+  }
+
+  // G. ORDER TRACKING
+  const orderKeywords = [
+    "where is my order", "track my package", "order status", "delivery status",
+    "has my parcel shipped", "awb tracking", "track order", "track ord-",
+    "where is my parcel", "is my package shipped", "package status", "shipment status",
+    "track my order", "where is it now", "kahan hai", "where is my delivery", "tracking status", "shipment"
+  ];
+
+  const hasOrderId = !!entities.orderId;
+  const isOrderQuery =
+    !lower.includes("refund") &&
+    !lower.includes("return") &&
+    !lower.includes("replace") &&
+    (orderKeywords.some((k) => lower.includes(k)) || (hasOrderId && (lower.includes("track") || lower.includes("where") || lower.includes("status") || lower.includes("arrive") || lower.includes("reached"))));
+
+  if (isOrderQuery || (hasOrderId && !lower.includes("return") && !lower.includes("refund") && !lower.includes("replace"))) {
+    return {
+      intent: "ORDER_TRACKING",
+      confidence: hasOrderId ? 0.98 : 0.88,
       entities,
     };
   }
@@ -257,7 +267,7 @@ function classifySingleIntent(
     "suggest", "recommend", "best laptop", "best phone", "earphones", "earbuds",
     "smartwatch", "gaming mouse", "gaming keyboard", "budget", "under ₹", "under rs",
     "under 20000", "under 3000", "cheaper ones", "cheapest", "premium phones",
-    "show gaming", "compare", "buying guide", "product for office"
+    "show gaming", "compare", "buying guide", "product for office", "apple", "iphone", "samsung", "dell", "hp", "lenovo", "asus", "logitech"
   ];
 
   const isProductQuery =

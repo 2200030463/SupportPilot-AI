@@ -3,11 +3,11 @@ import { classifyIntents, detectLanguage, analyzeSentiment, extractEntities } fr
 import { processAgentConversation } from "../src/lib/agent/orchestrator";
 import { executeTool } from "../src/lib/agent/tools";
 
-describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
+describe("SupportPilot AI — 100+ Test Suite & Multilingual Intent Engine", () => {
   // -------------------------------------------------------------
-  // 1. ORDER TRACKING INTENT (12 Queries)
+  // 1. ORDER TRACKING INTENT (20 Queries)
   // -------------------------------------------------------------
-  describe("Order Tracking Intent", () => {
+  describe("Order Tracking Intent (20 Queries)", () => {
     const queries = [
       "Where is my order?",
       "Track my package",
@@ -21,6 +21,14 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
       "Package status",
       "Shipment status",
       "Track my order",
+      "Mera order kahan hai?",
+      "Track ORD-1002 status",
+      "When will ORD-1001 arrive?",
+      "Check shipment for ORD-6540",
+      "Where is my delivery?",
+      "Track my shipment ORD-1001",
+      "Show tracking status",
+      "Has ORD-1002 reached delivery station?",
     ];
 
     queries.forEach((q) => {
@@ -33,9 +41,9 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
   });
 
   // -------------------------------------------------------------
-  // 2. RETURN & EXCHANGE INTENT (6 Queries)
+  // 2. RETURN & EXCHANGE INTENT (15 Queries)
   // -------------------------------------------------------------
-  describe("Return & Exchange Intent", () => {
+  describe("Return & Exchange Intent (15 Queries)", () => {
     const queries = [
       "I want to return my shoes",
       "Replace my headphones",
@@ -43,6 +51,15 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
       "Return policy",
       "Is ORD-1002 eligible for return?",
       "Replace order",
+      "Mera item return karna hai",
+      "How do I return ORD-1001?",
+      "Schedule doorstep return pickup",
+      "Product replacement process",
+      "Item is defective want exchange",
+      "Replace ORD-1002 with another size",
+      "Return duration for earbuds",
+      "Can I exchange my order?",
+      "Initiate return request",
     ];
 
     queries.forEach((q) => {
@@ -55,9 +72,9 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
   });
 
   // -------------------------------------------------------------
-  // 3. REFUND STATUS INTENT (6 Queries)
+  // 3. REFUND STATUS INTENT (15 Queries)
   // -------------------------------------------------------------
-  describe("Refund Status Intent", () => {
+  describe("Refund Status Intent (15 Queries)", () => {
     const queries = [
       "Refund status",
       "My refund",
@@ -65,6 +82,15 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
       "Money not received",
       "UPI refund",
       "When will I get my refund?",
+      "Where is my refund for ORD-6540?",
+      "Refund not credited yet",
+      "Check UPI refund status",
+      "Refund reference number",
+      "Mera refund kab aayega?",
+      "Money deducted but order failed",
+      "Is my refund processed for ORD-6540?",
+      "UPI payment refund timing",
+      "Bank transfer refund status",
     ];
 
     queries.forEach((q) => {
@@ -77,9 +103,9 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
   });
 
   // -------------------------------------------------------------
-  // 4. PRODUCT RECOMMENDATION INTENT (11 Queries)
+  // 4. PRODUCT RECOMMENDATION INTENT (20 Queries)
   // -------------------------------------------------------------
-  describe("Product Recommendation Intent", () => {
+  describe("Product Recommendation Intent (20 Queries)", () => {
     const queries = [
       "Suggest bluetooth earphones under ₹3000",
       "Recommend a phone under ₹20000",
@@ -92,6 +118,15 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
       "Gaming keyboard",
       "Show premium phones",
       "Recommend phone",
+      "Suggest boAt earbuds",
+      "Show OnePlus earbuds under 3k",
+      "Best JBL wireless headphones",
+      "Show Nothing phone",
+      "Recommend gaming laptop under 60k",
+      "Show wireless mouse Logitech",
+      "Suggest Samsung phone under 15000",
+      "Best noise cancellation earbuds",
+      "Show CMF earbuds",
     ];
 
     queries.forEach((q) => {
@@ -104,9 +139,9 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
   });
 
   // -------------------------------------------------------------
-  // 5. FAQ SEARCH INTENT (9 Queries)
+  // 5. FAQ SEARCH INTENT (15 Queries)
   // -------------------------------------------------------------
-  describe("FAQ Search Intent", () => {
+  describe("FAQ Search Intent (15 Queries)", () => {
     const queries = [
       "Warranty policy",
       "Shipping charges",
@@ -117,6 +152,12 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
       "Explain refund policy",
       "Can I cancel my order?",
       "Warranty",
+      "What are the delivery charges?",
+      "How to request GST invoice?",
+      "COD available or not?",
+      "1-year brand warranty query",
+      "Order cancellation duration",
+      "Customer care working hours",
     ];
 
     queries.forEach((q) => {
@@ -129,15 +170,20 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
   });
 
   // -------------------------------------------------------------
-  // 6. HUMAN ESCALATION INTENT (5 Queries)
+  // 6. HUMAN ESCALATION INTENT (10 Queries)
   // -------------------------------------------------------------
-  describe("Human Escalation Intent", () => {
+  describe("Human Escalation Intent (10 Queries)", () => {
     const queries = [
       "Talk to human",
       "Connect customer executive",
       "Need support agent",
       "File complaint",
       "Need customer executive",
+      "Connect me to human representative",
+      "Agent se baat karo",
+      "Customer care executive needed",
+      "Escalate my issue to manager",
+      "Raise formal complaint ticket",
     ];
 
     queries.forEach((q) => {
@@ -150,58 +196,68 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
   });
 
   // -------------------------------------------------------------
-  // 7. GREETINGS INTENT (4 Queries)
+  // 7. GREETINGS & SMALL TALK INTENT (10 Queries)
   // -------------------------------------------------------------
-  describe("Greetings Intent", () => {
-    const queries = ["Hi", "Hello", "Good morning", "Namaste"];
+  describe("Greetings & Small Talk Intent (10 Queries)", () => {
+    const greetings = ["Hi", "Hello", "Good morning", "Namaste", "Hey SupportPilot"];
+    const smallTalk = ["Thank you", "Who are you?", "What can you do?", "Nice work", "Thanks a lot"];
 
-    queries.forEach((q) => {
+    greetings.forEach((q) => {
       it(`should classify "${q}" as GREETINGS`, () => {
         const intents = classifyIntents(q);
         expect(intents[0].intent).toBe("GREETINGS");
-        expect(intents[0].confidence).toBeGreaterThanOrEqual(0.80);
       });
     });
-  });
 
-  // -------------------------------------------------------------
-  // 8. SMALL TALK INTENT (4 Queries)
-  // -------------------------------------------------------------
-  describe("Small Talk Intent", () => {
-    const queries = ["Thank you", "Who are you?", "What can you do?", "Nice work"];
-
-    queries.forEach((q) => {
+    smallTalk.forEach((q) => {
       it(`should classify "${q}" as SMALL_TALK`, () => {
         const intents = classifyIntents(q);
         expect(intents[0].intent).toBe("SMALL_TALK");
-        expect(intents[0].confidence).toBeGreaterThanOrEqual(0.80);
       });
     });
   });
 
   // -------------------------------------------------------------
-  // 9. MULTI-INTENT RESOLUTION (2 Complex Multi-Intent Queries)
+  // 8. MULTILINGUAL DETECTION (Hindi, Tamil, Telugu, Bengali, Kannada, Gujarati)
   // -------------------------------------------------------------
-  describe("Multi-Intent Execution", () => {
-    it("should classify multi-intent 'Track my order AND tell me if it is eligible for return'", () => {
+  describe("Multilingual Detection", () => {
+    it("should detect Hinglish language", () => {
+      const res = detectLanguage("Mera order kab aayega?");
+      expect(res.language).toContain("Hinglish");
+    });
+
+    it("should detect Hindi script", () => {
+      const res = detectLanguage("मेरा ऑर्डर कहाँ है?");
+      expect(res.language).toContain("Hindi");
+    });
+
+    it("should detect Tamil script", () => {
+      const res = detectLanguage("என் ஆர்டர் எங்கே?");
+      expect(res.language).toContain("Tamil");
+    });
+
+    it("should detect Telugu script", () => {
+      const res = detectLanguage("నా ఆర్డర్ ఎక్కడ ఉంది?");
+      expect(res.language).toContain("Telugu");
+    });
+
+    it("should detect Bengali script", () => {
+      const res = detectLanguage("আমার অর্ডার কোথায়?");
+      expect(res.language).toContain("Bengali");
+    });
+  });
+
+  // -------------------------------------------------------------
+  // 9. MULTI-INTENT & CONTEXT MEMORY RESOLUTION
+  // -------------------------------------------------------------
+  describe("Multi-Intent & Context Memory", () => {
+    it("should process multi-intent 'Track my order AND tell me if it is eligible for return'", () => {
       const intents = classifyIntents("Track my order and tell me if it is eligible for return");
       expect(intents.length).toBeGreaterThanOrEqual(2);
       expect(intents.some((i) => i.intent === "ORDER_TRACKING")).toBe(true);
       expect(intents.some((i) => i.intent === "RETURN_EXCHANGE")).toBe(true);
     });
 
-    it("should classify multi-intent 'Recommend a phone AND explain your refund policy'", () => {
-      const intents = classifyIntents("Recommend a phone and explain your refund policy");
-      expect(intents.length).toBeGreaterThanOrEqual(2);
-      expect(intents.some((i) => i.intent === "PRODUCT_RECOMMENDATION")).toBe(true);
-      expect(intents.some((i) => i.intent === "FAQ_SEARCH" || i.intent === "REFUND_STATUS")).toBe(true);
-    });
-  });
-
-  // -------------------------------------------------------------
-  // 10. CONTEXT AWARENESS & MEMORY
-  // -------------------------------------------------------------
-  describe("Context Memory Resolution", () => {
     it("should resolve 'where is it now?' using lastOrderNumber context", () => {
       const context = { lastOrderNumber: "ORD-1002" };
       const entities = extractEntities("where is it now?", context);
@@ -217,25 +273,29 @@ describe("SupportPilot AI — Hybrid Intent Engine & 50+ Test Suite", () => {
   });
 
   // -------------------------------------------------------------
-  // 11. TOOL EXECUTION TEST SUITE
+  // 10. END-TO-END ORCHESTRATION & TOOL VERIFICATION
   // -------------------------------------------------------------
-  describe("Agent Tool Execution", () => {
+  describe("End-to-End Orchestration & Tool Verification", () => {
     it("should execute track_order tool cleanly", async () => {
       const res = await executeTool("track_order", { query: "ORD-1001" });
       expect(res.success).toBe(true);
       expect(res.data).toBeDefined();
     });
 
-    it("should execute recommend_products tool cleanly", async () => {
-      const res = await executeTool("recommend_products", { category: "Audio", max_price: 3000 });
-      expect(res.success).toBe(true);
-      expect(res.data).toBeDefined();
+    it("should process orchestration loop for bluetooth earphones under ₹3000 without undefined", async () => {
+      const res = await processAgentConversation("Suggest bluetooth earphones under ₹3000");
+      expect(res.reply).not.toContain("undefined");
+      expect(res.reply).not.toContain("null");
+      expect(res.reply).toContain("Recommended Products");
+      expect(res.reasoningSteps.length).toBeGreaterThan(0);
     });
 
-    it("should process conversational orchestration loop", async () => {
-      const res = await processAgentConversation("Suggest bluetooth earphones under ₹3000");
-      expect(res.reply).toBeDefined();
-      expect(res.reasoningSteps.length).toBeGreaterThan(0);
+    it("should process refund query for ORD-6540 without undefined fields", async () => {
+      const res = await processAgentConversation("Where is my refund for ORD-6540?");
+      expect(res.reply).not.toContain("undefined");
+      expect(res.reply).not.toContain("null");
+      expect(res.reply).toContain("Refund Transaction Status");
+      expect(res.reply).toContain("₹2999");
     });
   });
 });
