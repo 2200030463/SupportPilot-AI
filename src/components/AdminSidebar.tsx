@@ -1,20 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   LifeBuoy,
   ShoppingBag,
   Package,
   HelpCircle,
-  BarChart3,
   Bot,
   LogOut,
 } from "lucide-react";
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    if (typeof window !== "undefined") {
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+    await signOut({ redirect: false });
+    router.replace("/");
+  };
 
   const navItems = [
     { href: "/admin", label: "Analytics Overview", icon: LayoutDashboard },
@@ -87,9 +97,14 @@ export function AdminSidebar() {
               <p className="text-[10px] text-slate-400">Head of CX</p>
             </div>
           </div>
-          <Link href="/login" className="p-2 text-slate-400 hover:text-rose-400" title="Logout">
+          <button
+            onClick={handleLogout}
+            className="p-2 text-slate-400 hover:text-rose-400 transition-colors"
+            title="Logout"
+            aria-label="Logout from admin panel"
+          >
             <LogOut className="h-4 w-4" />
-          </Link>
+          </button>
         </div>
       </div>
     </aside>

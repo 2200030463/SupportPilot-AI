@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Bot, ShieldCheck, Lock, Mail, ArrowRight, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
+  const { data: session, status } = useSession();
   const [email, setEmail] = useState("admin@supportpilot.ai");
   const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/admin");
+    }
+  }, [status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,13 +27,21 @@ export default function LoginPage() {
         password,
         redirect: false,
       });
-      router.push("/admin");
+      if (res?.ok) {
+        router.replace("/admin");
+      } else {
+        router.replace("/admin");
+      }
     } catch (err) {
-      router.push("/admin");
+      router.replace("/admin");
     } finally {
       setLoading(false);
     }
   };
+
+  if (status === "authenticated") {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500">

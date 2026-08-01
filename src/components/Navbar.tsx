@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useSmartBack } from "@/hooks/useSmartBack";
@@ -15,24 +15,30 @@ import {
   Bot,
   Menu,
   X,
-  Sparkles,
 } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const handleSmartBack = useSmartBack();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const session = useSession()?.data;
+  const isAuthenticated = !!session;
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: "/login" });
+    if (typeof window !== "undefined") {
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+    await signOut({ redirect: false });
+    router.replace("/");
   };
 
   const navItems = [
     { href: "/", label: "Home", icon: Home },
     { href: "/chat", label: "Customer Chat", icon: MessageSquare },
-    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/login", label: "Admin Login", icon: UserCheck },
+    { href: isAuthenticated ? "/admin" : "/login", label: "Dashboard", icon: LayoutDashboard },
+    { href: isAuthenticated ? "/admin" : "/login", label: isAuthenticated ? "Admin Desk" : "Admin Login", icon: UserCheck },
   ];
 
   return (
@@ -69,12 +75,12 @@ export function Navbar() {
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-2">
-          {navItems.map((item) => {
+          {navItems.map((item, idx) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
             return (
               <Link
-                key={item.href}
+                key={idx}
                 href={item.href}
                 className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
                   isActive
@@ -91,7 +97,7 @@ export function Navbar() {
 
         {/* Right Actions: User Profile / Logout */}
         <div className="hidden md:flex items-center gap-3">
-          {session?.user ? (
+          {isAuthenticated ? (
             <button
               onClick={handleLogout}
               className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-semibold text-rose-400 border border-rose-500/20 hover:bg-rose-500/10 transition-colors"
@@ -131,12 +137,12 @@ export function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden border-b border-slate-800 bg-slate-950/95 px-4 pt-3 pb-6 space-y-3 backdrop-blur-2xl">
           <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
-            {navItems.map((item) => {
+            {navItems.map((item, idx) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
                 <Link
-                  key={item.href}
+                  key={idx}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-2 rounded-xl p-3 border ${
@@ -163,16 +169,19 @@ export function Navbar() {
               <ArrowLeft className="h-4 w-4 text-cyan-400" />
               Back
             </button>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                handleLogout();
-              }}
-              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-rose-500/10 py-2.5 text-xs font-semibold text-rose-400 border border-rose-500/20"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </button>
+
+            {isAuthenticated && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-rose-500/10 py-2.5 text-xs font-semibold text-rose-400 border border-rose-500/20"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
+            )}
           </div>
         </div>
       )}
