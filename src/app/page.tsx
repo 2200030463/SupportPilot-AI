@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import {
   Bot,
@@ -23,8 +22,6 @@ import {
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-slate-950">
-      <Navbar />
-
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-16 pb-24 lg:pt-24 lg:pb-32 gradient-glow">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 text-center">

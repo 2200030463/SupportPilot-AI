@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Navbar } from "@/components/Navbar";
 import { Bot, ShieldCheck, Lock, Mail, ArrowRight, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
@@ -31,8 +30,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500">
-      <Navbar />
-
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md space-y-8 glass-card rounded-3xl p-8 border border-slate-800 shadow-2xl">
           {/* Brand Header */}
