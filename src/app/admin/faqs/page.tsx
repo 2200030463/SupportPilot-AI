@@ -27,9 +27,14 @@ export default function AdminFAQsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-100">Multilingual FAQ Knowledge RAG Base</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-extrabold text-slate-100">Multilingual FAQ Knowledge RAG Base</h1>
+            <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/20">
+              Showing {filteredFaqs.length} of {faqs.length} FAQs
+            </span>
+          </div>
           <p className="text-xs text-slate-400 mt-1">
-            50+ curated FAQs across English, Hindi, Hinglish, Tamil, and Telugu used by SupportPilot AI
+            Curated FAQs across English, Hindi, Hinglish, Tamil, and Telugu used by SupportPilot AI
           </p>
         </div>
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   LifeBuoy,
@@ -17,6 +18,37 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const [counts, setCounts] = useState({
+    tickets: 0,
+    orders: 0,
+    products: 0,
+    faqs: 0,
+  });
+
+  useEffect(() => {
+    async function loadCounts() {
+      try {
+        const [ticketsRes, ordersRes, productsRes, faqsRes] = await Promise.all([
+          fetch("/api/tickets").then((r) => r.json()).catch(() => ({})),
+          fetch("/api/orders").then((r) => r.json()).catch(() => ({})),
+          fetch("/api/products").then((r) => r.json()).catch(() => ({})),
+          fetch("/api/faqs").then((r) => r.json()).catch(() => ({})),
+        ]);
+
+        setCounts({
+          tickets: ticketsRes.tickets?.length || 0,
+          orders: ordersRes.orders?.length || 0,
+          products: productsRes.products?.length || 0,
+          faqs: faqsRes.faqs?.length || 0,
+        });
+      } catch (err) {
+        console.error("Error loading sidebar counts:", err);
+      }
+    }
+
+    loadCounts();
+  }, [pathname]);
+
   const handleLogout = async () => {
     if (typeof window !== "undefined") {
       localStorage.clear();
@@ -28,10 +60,10 @@ export function AdminSidebar() {
 
   const navItems = [
     { href: "/admin", label: "Analytics Overview", icon: LayoutDashboard },
-    { href: "/admin/tickets", label: "Escalation Queue", icon: LifeBuoy, badge: "15" },
-    { href: "/admin/orders", label: "Orders & Deliveries", icon: Package, badge: "20" },
-    { href: "/admin/products", label: "Products Catalog", icon: ShoppingBag, badge: "30" },
-    { href: "/admin/faqs", label: "FAQ RAG Knowledge", icon: HelpCircle, badge: "50" },
+    { href: "/admin/tickets", label: "Escalation Queue", icon: LifeBuoy, badge: counts.tickets },
+    { href: "/admin/orders", label: "Orders & Deliveries", icon: Package, badge: counts.orders },
+    { href: "/admin/products", label: "Products Catalog", icon: ShoppingBag, badge: counts.products },
+    { href: "/admin/faqs", label: "FAQ RAG Knowledge", icon: HelpCircle, badge: counts.faqs },
   ];
 
   return (
@@ -57,6 +89,8 @@ export function AdminSidebar() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
+          const showBadge = item.badge !== undefined && item.badge !== null;
+
           return (
             <Link
               key={item.href}
@@ -71,7 +105,7 @@ export function AdminSidebar() {
                 <Icon className={`h-4 w-4 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
                 <span>{item.label}</span>
               </div>
-              {item.badge && (
+              {showBadge && (
                 <span
                   className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                     isActive ? "bg-emerald-500 text-slate-950" : "bg-slate-800 text-slate-400"

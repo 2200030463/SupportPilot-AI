@@ -22,7 +22,12 @@ export default function AdminOrdersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-100">Orders & Logistics Manager</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-extrabold text-slate-100">Orders & Logistics Manager</h1>
+            <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/20">
+              Showing {orders.length} orders
+            </span>
+          </div>
           <p className="text-xs text-slate-400 mt-1">
             Real-time fulfillment tracking across Delhivery, BlueDart, Xpressbees, and Ecom Express
           </p>
@@ -33,7 +38,7 @@ export default function AdminOrdersPage() {
           <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-500" />
           <input
             type="text"
-            placeholder="Search Order # (ORD-8921), email, customer..."
+            placeholder="Search Order # (ORD-1001), email, customer..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl bg-slate-900 pl-10 pr-4 py-2 text-xs text-slate-200 border border-slate-800 focus:outline-none focus:border-emerald-500"

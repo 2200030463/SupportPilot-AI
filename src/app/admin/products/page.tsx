@@ -23,9 +23,14 @@ export default function AdminProductsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-100">Products Catalog RAG Base</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-extrabold text-slate-100">Products Catalog RAG Base</h1>
+            <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/20">
+              Showing {products.length} products
+            </span>
+          </div>
           <p className="text-xs text-slate-400 mt-1">
-            30+ seeded products with specs and return policies available to SupportPilot AI agent
+            Seeded products with specs and return policies available to SupportPilot AI agent
           </p>
         </div>
 

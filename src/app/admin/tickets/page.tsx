@@ -86,6 +86,9 @@ export default function TicketsQueuePage() {
               <ShieldAlert className="h-3.5 w-3.5" />
               {tickets.filter((t) => t.status === "Escalated").length} Escalated Priority
             </span>
+            <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/20">
+              Showing {filteredTickets.length} of {tickets.length} tickets
+            </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
             Real-time human agent resolution queue for customer tickets handed off by SupportPilot AI
